@@ -1,42 +1,44 @@
+if (window.history.replaceState) {
+	window.history.replaceState(null, null, window.location.href);
+}
 
 
+document.addEventListener("DOMContentLoaded", () => {
+	// Injected by Thymeleaf from server
+	const aesKeyBase64 = AES_KEY_FROM_SERVER;
+	console.log("aes key  " + aesKeyBase64);
+	const form = document.querySelector("form[action='login']");
+	form.addEventListener("submit", function(event) {
+		event.preventDefault();
 
-/*document.addEventListener("DOMContentLoaded", () => {
-   // Injected by Thymeleaf from server
-   const aesKeyBase64 = AES_KEY_FROM_SERVER;
-   console.log("aes key  " + aesKeyBase64);
-   const form = document.querySelector("form[action='login']");
-   form.addEventListener("submit", function(event) {
-	   event.preventDefault();
+		const username = document.querySelector("input[name='username']").value;
+		const password = document.querySelector("input[name='password']").value;
 
-	   const username = document.querySelector("input[name='username']").value;
-	   const password = document.querySelector("input[name='password']").value;
+		// Decode Base64 key into CryptoJS WordArray
+		const key = CryptoJS.enc.Base64.parse(aesKeyBase64);
 
-	   // Decode Base64 key into CryptoJS WordArray
-	   const key = CryptoJS.enc.Base64.parse(aesKeyBase64);
+		// Encrypt with AES/ECB/PKCS5Padding (Java-compatible)
+		const encUsername = CryptoJS.AES.encrypt(username, key, {
+			mode: CryptoJS.mode.ECB,
+			padding: CryptoJS.pad.Pkcs7
+		}).toString();
 
-	   // Encrypt with AES/ECB/PKCS5Padding (Java-compatible)
-	   const encUsername = CryptoJS.AES.encrypt(username, key, {
-		   mode: CryptoJS.mode.ECB,
-		   padding: CryptoJS.pad.Pkcs7
-	   }).toString();
+		const encPassword = CryptoJS.AES.encrypt(password, key, {
+			mode: CryptoJS.mode.ECB,
+			padding: CryptoJS.pad.Pkcs7
+		}).toString();
 
-	   const encPassword = CryptoJS.AES.encrypt(password, key, {
-		   mode: CryptoJS.mode.ECB,
-		   padding: CryptoJS.pad.Pkcs7
-	   }).toString();
+		// Replace plaintext with ciphertext
+		document.querySelector("input[name='username']").value = encUsername;
+		document.querySelector("input[name='password']").value = encPassword;
 
-	   // Replace plaintext with ciphertext
-	   document.querySelector("input[name='username']").value = encUsername;
-	   document.querySelector("input[name='password']").value = encPassword;
+		// Submit the encrypted form
+		this.submit();
 
-	   // Submit the encrypted form
-	   this.submit();
-
-	   //  Immediately remove key from memory after use
-	   setTimeout(() => { window.aesKeyBase64 = null; }, 500);
-   });
-});*/
+		//  Immediately remove key from memory after use
+		setTimeout(() => { window.aesKeyBase64 = null; }, 500);
+	});
+});
 
 
 //2 Minutes Timer
@@ -61,10 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	function checkOtpInput() {
 		if (timeLeft <= 0 && otpInput.value.trim() !== "") {
-			resentOtpBtn.disabled = false;
+			//resentOtpBtn.disabled = false;
 
 		} else {
-			resentOtpBtn.disabled = true;
+			//resentOtpBtn.disabled = true;
 
 
 

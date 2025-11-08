@@ -13,47 +13,88 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class AuthFilter implements Filter {
-	private static final Logger LOG = LoggerFactory.getLogger(AuthFilter.class);
-
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		LOG.info("AuthFilter initiated");
-	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		LOG.info("AuthFilter doFilter started");
-
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
 		HttpSession session = req.getSession(false);
-		String path = req.getRequestURI();
 
-		if (path.endsWith("login") || path.endsWith("logout") || path.contains("otpVerify") || path.contains("css")
-				|| path.contains("js") || path.contains("images")) {
+		String uri = req.getRequestURI();
+		String contextPath = req.getContextPath();
 
+		// Allow login, OTP, and static resource URLs to pass through
+		if (uri.startsWith(contextPath + "/login") || uri.startsWith(contextPath + "/otpVerify")
+				|| uri.startsWith(contextPath + "/css/") || uri.startsWith(contextPath + "/js/")
+				|| uri.startsWith(contextPath + "/images/")) {
 			chain.doFilter(request, response);
 			return;
 		}
 
-		if (session == null || session.getAttribute("loggedInUser") == null) {
-			LOG.warn("No active session, redirecting to login");
-			resp.sendRedirect(req.getContextPath() + "/login");
+		// No active session → redirect to login
+		if (session == null) {
+			redirectToLogin(resp, contextPath);
 			return;
 		}
 
+		// Fetch values from session
+		String loggedInUser = (String) session.getAttribute("loggedInUser");
+		String serverSessionKey = (String) session.getAttribute("sessionKey");
+
+		// Read the sessionKey cookie (set during successful login)
+		String cookieSessionKey = null;
+		if (req.getCookies() != null) {
+			for (Cookie cookie : req.getCookies()) {
+				if ("sessionKey".equals(cookie.getName())) {
+					cookieSessionKey = cookie.getValue();
+					break;
+				}
+			}
+		}
+
+		// 5️⃣ Validate presence of user and session key
+		if (loggedInUser == null || serverSessionKey == null || cookieSessionKey == null) {
+			System.out.println("[AuthFilter] Missing authentication details. Redirecting to login.");
+			invalidateSession(session);
+			redirectToLogin(resp, contextPath);
+			return;
+		}
+
+		// 6️⃣ Cross-check sessionKey from cookie and server
+		if (!serverSessionKey.equals(cookieSessionKey)) {
+			System.out.println("[AuthFilter] Session key mismatch. Possible hijack attempt detected.");
+			invalidateSession(session);
+			redirectToLogin(resp, contextPath);
+			return;
+		}
+
+		// 7️⃣ Everything is valid → proceed with request
 		chain.doFilter(request, response);
-		LOG.info("AuthFilter doFilter ended");
+	}
+
+	private void redirectToLogin(HttpServletResponse resp, String contextPath) throws IOException {
+		resp.sendRedirect(contextPath + "/login");
+	}
+
+	private void invalidateSession(HttpSession session) {
+		try {
+			session.invalidate();
+		} catch (IllegalStateException ignored) {
+		}
+	}
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public void destroy() {
-		LOG.info("AuthFilter destroyed");
+		// TODO Auto-generated method stub
+
 	}
 }
