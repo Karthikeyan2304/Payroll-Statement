@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>DASHBOARD</title>
+
+<!-- Bootstrap CSS -->
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Excel lib  script-->
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- PDF lib  script-->
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<link th:href="@{/css/welcome.css}" rel="stylesheet">
+
+
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="text/javascript" th:src="@{/js/dashboard.js}"></script>
+</head>
+
+<body>
+	<div th:replace="fragments/navbar :: navbar"></div>
+
+	<div class="container mt-4">
+		<h3 class="mb-4 text-center">PAYROLL DETAILS</h3>
+
+		<!-- Tabs -->
+		<ul class="nav nav-tabs" id="payrollTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="current-tab"
+					data-bs-toggle="tab" data-bs-target="#current" type="button"
+					role="tab">Current Month</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="previous-tab" data-bs-toggle="tab"
+					data-bs-target="#previous" type="button" role="tab">Previous
+					Months</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="ytd-tab" data-bs-toggle="tab"
+					data-bs-target="#ytd" type="button" role="tab">YTD Summary</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tax-tab" data-bs-toggle="tab"
+					data-bs-target="#tax" type="button" role="tab">Tax Breakup</button>
+			</li>
+		</ul>
+
+		<!-- Tab Content -->
+		<div
+			class="tab-content p-4 bg-white border border-top-0 rounded-bottom shadow-sm"
+			id="payrollTabsContent">
+
+			<!-- Current Month -->
+			<div class="tab-pane fade show active" id="current" role="tabpanel"
+				aria-labelledby="current-tab">
+				<h5>Current Month Payroll</h5>
+				<table class="table table-bordered table-striped mt-3"
+					id="currentTable">
+					<thead class="table-light">
+						<tr>
+							<th>#</th>
+							<th>Emp Code</th>
+							<th>Name</th>
+							<th>Month</th>
+							<th>Basic Pay</th>
+							<th>HRA</th>
+							<th>Allowances</th>
+							<th>Deductions</th>
+							<th>Tax</th>
+							<th>Gross Pay</th>
+							<th>Net Pay</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="12" class="text-center text-muted">Click tab to
+								load current month payroll...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!--  Previous Months -->
+			<div class="tab-pane fade" id="previous" role="tabpanel"
+				aria-labelledby="previous-tab">
+				<h5>Previous Months Payroll</h5>
+				<table class="table table-bordered table-striped mt-3"
+					id="previousTable">
+					<thead class="table-light">
+						<tr>
+							<th>#</th>
+							<th>Emp Code</th>
+							<th>Name</th>
+							<th>Month</th>
+							<th>Basic Pay</th>
+							<th>HRA</th>
+							<th>Allowances</th>
+							<th>Deductions</th>
+							<th>Tax</th>
+							<th>Gross Pay</th>
+							<th>Net Pay</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="12" class="text-center text-muted">Click tab to
+								load previous payroll...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- YTD Summary -->
+			<div class="tab-pane fade" id="ytd" role="tabpanel"
+				aria-labelledby="ytd-tab">
+				<h5>Year-To-Date Summary</h5>
+				<table class="table table-bordered table-striped mt-3" id="ytdTable">
+					<thead class="table-light">
+						<tr>
+							<th>#</th>
+							<th>Emp Code</th>
+							<th>Name</th>
+							<th>Month</th>
+							<th>Basic Pay</th>
+							<th>HRA</th>
+							<th>Allowances</th>
+							<th>Deductions</th>
+							<th>Tax</th>
+							<th>Gross Pay</th>
+							<th>Net Pay</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="12" class="text-center text-muted">Click tab to
+								load YTD summary...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Tax Breakup -->
+			<div class="tab-pane fade" id="tax" role="tabpanel"
+				aria-labelledby="tax-tab">
+				<h5>Tax Breakup</h5>
+				<table class="table table-bordered table-striped mt-3" id="taxTable">
+					<thead class="table-light">
+						<tr>
+							<th>#</th>
+							<th>Emp Code</th>
+							<th>Name</th>
+							<th>Month</th>
+							<th>Taxable Income</th>
+							<th>Exemptions</th>
+							<th>Tax Paid</th>
+							<th>TDS</th>
+							<th>Net Tax</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="10" class="text-center text-muted">Click tab to
+								load tax breakup...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<!-- Payroll Details Modal -->
+	<div class="modal fade" id="payrollModal" tabindex="-1"
+		aria-labelledby="payrollModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content shadow-lg">
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title" id="payrollModalLabel">Payroll Details</h5>
+					<button type="button" class="btn-close btn-close-white"
+						data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-bordered">
+						<tbody id="payrollModalBody">
+							<!-- Data will be dynamically inserted here -->
+						</tbody>
+					</table>
+				</div>
+
+				<div class="modal-footer">
+					<button id="modalDownloadBtnPDF" type="button"
+						class="btn btn-success">
+						<i class="bi bi-file-earmark-excel"></i> Download PDF
+					</button>
+					<button id="modalDownloadBtnExcel" type="button"
+						class="btn btn-success">
+						<i class="bi bi-file-earmark-excel"></i> Download Excel
+					</button>
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
