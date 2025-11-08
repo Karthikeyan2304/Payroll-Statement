@@ -1,8 +1,0 @@
-eclipse.preferences.version=1
-encoding//src/main/java/com/payroll/report/controller/LoginServlet.java=UTF-8
-encoding//src/main/java/com/payroll/report/controller/OTPVerifyServlet.java=UTF-8
-encoding//src/main/java/com/payroll/report/filter/AuthFilter.java=UTF-8
-encoding//src/main/java/com/payroll/report/filter/HttpsRedirectFilter.java=UTF-8
-encoding//src/main/java/com/payroll/report/util/ExportPDFUtil.java=UTF-8
-encoding//src/main/resources/templates/login.html=UTF-8
-encoding//src/main/resources/templates/welcome.html=UTF-8
