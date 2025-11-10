@@ -43,7 +43,12 @@ body {
 	border-radius: 10px;
 	display: block;
 }
-
+button#resentOtp {
+    margin-left: 3em;
+    margin-top: 0em !important;
+    width: 111px;
+    height: 38px;
+}
 #loginBtn:hover {
 	background-position: right center;
 	color: #fff;

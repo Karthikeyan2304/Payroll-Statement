@@ -55,21 +55,34 @@ public class ResendOtpServlet extends HttpServlet {
 		}
 
 		String userName = (String) session.getAttribute("loggedInUser");
+		String phoneNumber = null;
 		try {
-			String phoneNumber = userService.getUserMobile(userName);
+			phoneNumber = userService.getUserMobile(userName);
 			if (phoneNumber == null || phoneNumber.isEmpty()) {
 				phoneNumber = "+918608041997"; // fallback for testing
 			}
 
 			userService.sendOTPToUser(phoneNumber);
-			resp.getWriter().write("{\"status\":\"success\"}");
+			session.setAttribute("otpPending", true);
+			session.setAttribute("pendingOTPUser", userName);
+			session.setAttribute("pendingPhone", phoneNumber);
+			resp.sendRedirect(req.getContextPath() + "/login");
+			return;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			resp.getWriter().write("{\"status\":\"error\", \"message\":\"Database error.\"}");
+			session.setAttribute("otpPending", true);
+			session.setAttribute("pendingOTPUser", userName);
+			session.setAttribute("pendingPhone", phoneNumber);
+			resp.sendRedirect(req.getContextPath() + "/login");
+			return;
 		} catch (Exception e) {
 			e.printStackTrace();
-			resp.getWriter().write("{\"status\":\"error\", \"message\":\"Unable to send OTP.\"}");
+			session.setAttribute("otpPending", true);
+			session.setAttribute("pendingOTPUser", userName);
+			session.setAttribute("pendingPhone", phoneNumber);
+			resp.sendRedirect(req.getContextPath() + "/login");
+			return;
 		}
 	}
 

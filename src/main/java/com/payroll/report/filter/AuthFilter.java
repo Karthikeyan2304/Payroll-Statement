@@ -26,7 +26,7 @@ public class AuthFilter implements Filter {
 		String uri = req.getRequestURI();
 		String contextPath = req.getContextPath();
 
-		// Allow login, OTP, and static resource URLs to pass through
+		// Allow login, OTP, and static resource URLs
 		if (uri.startsWith(contextPath + "/login") || uri.startsWith(contextPath + "/otpVerify")
 				|| uri.startsWith(contextPath + "/css/") || uri.startsWith(contextPath + "/js/")
 				|| uri.startsWith(contextPath + "/images/")) {
@@ -55,7 +55,7 @@ public class AuthFilter implements Filter {
 			}
 		}
 
-		// 5️⃣ Validate presence of user and session key
+		// 5️ Validate presence of user and session key
 		if (loggedInUser == null || serverSessionKey == null || cookieSessionKey == null) {
 			System.out.println("[AuthFilter] Missing authentication details. Redirecting to login.");
 			invalidateSession(session);

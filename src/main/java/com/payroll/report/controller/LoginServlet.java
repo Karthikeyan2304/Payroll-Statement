@@ -58,7 +58,7 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 		HttpSession session = req.getSession(false);
 
 		// Already logged in → redirect
-		if (session != null && session.getAttribute("loggedInUser") != null) {
+		if (session != null && session.getAttribute("loggedInUser") != null && session.getAttribute("pendingOTPUser")==null) {
 			resp.sendRedirect(req.getContextPath() + "/welcome");
 			return;
 		}

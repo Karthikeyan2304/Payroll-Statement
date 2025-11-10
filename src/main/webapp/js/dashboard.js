@@ -1,123 +1,47 @@
 $(document).ready(function() {
 
-	// YTD Payroll AJAX Call
-
-	$("#ytd-tab").on("click", function() {
+	function loadPayroll(type, tableId) {
 		$.ajax({
-			url: "getYeartoDatePayroll",
+			url: "getPayrollData",
 			type: "GET",
+			data: { type: type }, // <-- passing the type as query param
 			dataType: "json",
 			success: function(data) {
-				let tbody = $("#ytdTable tbody");
+				let tbody = $(`#${tableId} tbody`);
 				tbody.empty();
 
 				if (data && data.length > 0) {
 					$.each(data, function(index, payroll) {
 						tbody.append(`
-                            <tr class="payroll-row" data-payroll='${JSON.stringify(payroll)}'>
-                                <td>${index + 1}</td>
-                                <td>${payroll.empCode}</td>
-                                <td>${payroll.name}</td>
-                                <td>${payroll.payrollMonth}</td>
-                                <td>${payroll.basicPay}</td>
-                                <td>${payroll.hra}</td>
-                                <td>${payroll.allowances}</td>
-                                <td>${payroll.deductions}</td>
-                                <td>${payroll.tax}</td>
-                                <td>${payroll.grossPay}</td>
-                                <td>${payroll.netPay}</td>
-                                <td>${payroll.status}</td>
-                            </tr>
-                        `);
+                        <tr class="payroll-row" data-payroll='${JSON.stringify(payroll)}'>
+                            <td>${index + 1}</td>
+                            <td>${payroll.empCode}</td>
+                            <td>${payroll.name}</td>
+                            <td>${payroll.payrollMonth}</td>
+                            <td>${payroll.basicPay}</td>
+                            <td>${payroll.hra}</td>
+                            <td>${payroll.allowances}</td>
+                            <td>${payroll.deductions}</td>
+                            <td>${payroll.tax}</td>
+                            <td>${payroll.grossPay}</td>
+                            <td>${payroll.netPay}</td>
+                            <td>${payroll.status}</td>
+                        </tr>
+                    `);
 					});
 				} else {
 					tbody.append("<tr><td colspan='12' class='text-center'>No records found</td></tr>");
 				}
 			},
 			error: function(xhr, status, error) {
-				console.error("Error fetching YTD Payroll:", error);
+				console.error("Error fetching Payroll:", error);
 			}
 		});
-	});
+	}
 
-	// Current Month Payroll AJAX Call
-	$("#current-tab").on("click", function() {
-		$.ajax({
-			url: "getCurrentMonthPayroll",
-			type: "GET",
-			dataType: "json",
-			success: function(data) {
-				let tbody = $("#currentTable tbody");
-				tbody.empty();
-
-				if (data && data.length > 0) {
-					$.each(data, function(index, payroll) {
-						tbody.append(`
-                            <tr class="payroll-row" data-payroll='${JSON.stringify(payroll)}'>
-                                <td>${index + 1}</td>
-                                <td>${payroll.empCode}</td>
-                                <td>${payroll.name}</td>
-                                <td>${payroll.payrollMonth}</td>
-                                <td>${payroll.basicPay}</td>
-                                <td>${payroll.hra}</td>
-                                <td>${payroll.allowances}</td>
-                                <td>${payroll.deductions}</td>
-                                <td>${payroll.tax}</td>
-                                <td>${payroll.grossPay}</td>
-                                <td>${payroll.netPay}</td>
-                                <td>${payroll.status}</td>
-                            </tr>
-                        `);
-					});
-				} else {
-					tbody.append("<tr><td colspan='12' class='text-center'>No records found</td></tr>");
-				}
-			},
-			error: function(xhr, status, error) {
-				console.error("Error fetching Current Month Payroll:", error);
-			}
-		});
-	});
-
-	// Previous Month Payroll AJAX Call
-
-	$("#previous-tab").on("click", function() {
-		$.ajax({
-			url: "getPreviousMonthPayroll",
-			type: "GET",
-			dataType: "json",
-			success: function(data) {
-				let tbody = $("#previousTable tbody");
-				tbody.empty();
-
-				if (data && data.length > 0) {
-					$.each(data, function(index, payroll) {
-						tbody.append(`
-                            <tr class="payroll-row" data-payroll='${JSON.stringify(payroll)}'>
-                                <td>${index + 1}</td>
-                                <td>${payroll.empCode}</td>
-                                <td>${payroll.name}</td>
-                                <td>${payroll.payrollMonth}</td>
-                                <td>${payroll.basicPay}</td>
-                                <td>${payroll.hra}</td>
-                                <td>${payroll.allowances}</td>
-                                <td>${payroll.deductions}</td>
-                                <td>${payroll.tax}</td>
-                                <td>${payroll.grossPay}</td>
-                                <td>${payroll.netPay}</td>
-                                <td>${payroll.status}</td>
-                            </tr>
-                        `);
-					});
-				} else {
-					tbody.append("<tr><td colspan='12' class='text-center'>No records found</td></tr>");
-				}
-			},
-			error: function(xhr, status, error) {
-				console.error("Error fetching Previous Month Payroll:", error);
-			}
-		});
-	});
+	$("#ytd-tab").on("click", () => loadPayroll("YTD", "ytdTable"));
+	$("#current-tab").on("click", () => loadPayroll("CURRENT", "currentTable"));
+	$("#previous-tab").on("click", () => loadPayroll("PREVIOUS", "previousTable"));
 
 	// Modal Row Click Event 
 	$(document).on("click", ".payroll-row", function() {
