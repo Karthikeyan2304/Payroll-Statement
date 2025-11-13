@@ -5,7 +5,12 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AESUtil {
+	private static final Logger LOG = LoggerFactory.getLogger(AESUtil.class);
+
 	public static String decrypt(String cipherText, String base64Key) {
 		try {
 			byte[] decodedKey = Base64.getDecoder().decode(base64Key);
@@ -18,7 +23,7 @@ public class AESUtil {
 			byte[] decrypted = cipher.doFinal(decodedValue);
 			return new String(decrypted);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.info("Error in the {} ", e.getMessage());
 			return null;
 		}
 	}

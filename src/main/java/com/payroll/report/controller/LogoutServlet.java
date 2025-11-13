@@ -13,20 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-/**
- * Servlet implementation class LogoutServlet
- */
 public class LogoutServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOG = LoggerFactory.getLogger(LogoutServlet.class);
-	TemplateEngine templateEngine;
+	static TemplateEngine templateEngine;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	public LogoutServlet() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
 	@Override
@@ -37,18 +31,15 @@ public class LogoutServlet extends HttpServlet {
 		classLoaderTemp.setTemplateMode("HTML");
 		classLoaderTemp.setCharacterEncoding("UTF-8");
 		classLoaderTemp.setCacheable(false);
-		TemplateEngine templateEngine = new TemplateEngine();
+		templateEngine = new TemplateEngine();
 		templateEngine.setTemplateResolver(classLoaderTemp);
-		// payrollService = new PayrollService();
+
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
+
 		HttpSession session = request.getSession(false);
 		if (session != null) {
 			session.invalidate();
@@ -57,7 +48,7 @@ public class LogoutServlet extends HttpServlet {
 			request.logout();
 		} catch (ServletException e) {
 			// Handle exception if logout fails
-			e.printStackTrace();
+			LOG.error("ServletException in the doGet {} : ", e.getMessage(), e);
 		}
 		LOG.info("..........System Logout........");
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -67,13 +58,9 @@ public class LogoutServlet extends HttpServlet {
 
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
 

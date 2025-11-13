@@ -1,6 +1,10 @@
 package com.payroll.report.db.connection;
 
 public class DBFactory {
+	private DBFactory() {
+
+	}
+
 	public static DBConnection getConnection(String dbType) {
 		if (dbType.equalsIgnoreCase("MYSQL")) {
 			return new MySQLConnection();
@@ -10,4 +14,5 @@ public class DBFactory {
 			throw new IllegalArgumentException("Unsupported database type: " + dbType);
 		}
 	}
+
 }

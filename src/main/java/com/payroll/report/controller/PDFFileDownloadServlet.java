@@ -1,51 +1,32 @@
 package com.payroll.report.controller;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.payroll.report.model.PayrollStatement;
 import com.payroll.report.service.PayrollService;
 import com.payroll.report.util.ExportPDFUtil;
 
-/**
- * Servlet implementation class PDFFileDownloadServlet
- */
 public class PDFFileDownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	TemplateEngine templateEngine;
 	PayrollService payrollService;
 	private static final Logger LOG = LoggerFactory.getLogger(PDFFileDownloadServlet.class);
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	public PDFFileDownloadServlet() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
+	@Override
 	public void init() throws javax.servlet.ServletException {
 		ClassLoaderTemplateResolver classLoaderTemp = new ClassLoaderTemplateResolver();
 		classLoaderTemp.setPrefix("templates/");
@@ -59,10 +40,7 @@ public class PDFFileDownloadServlet extends HttpServlet {
 
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String month = request.getParameter("month");
@@ -73,18 +51,19 @@ public class PDFFileDownloadServlet extends HttpServlet {
 				"Deduction", "Tax", "Over Time", "Over Amount", "Bonus Amount", "Gross Pay", "Net Pay", "Status" };
 		LOG.info("PDF TABLE Started");
 		response.setContentType("application/pdf");
-
+       try {
 		ExportPDFUtil.exportPDF(fileName, headers, response, allPayroll, allPayrollFlag, month);
-
+       }
+       catch(Exception e)
+       {
+    	LOG.error("Exception in the doGet {}",e.getMessage(),e);
+       }
 	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+    
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
+
 		doGet(request, response);
 	}
 

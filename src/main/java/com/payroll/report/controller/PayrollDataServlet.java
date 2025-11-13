@@ -19,8 +19,9 @@ import java.util.List;
 
 public class PayrollDataServlet extends HttpServlet {
 
+	private static final long serialVersionUID = 1L;
 	private PayrollService payrollService;
-	private Gson gson = new Gson();
+	private final Gson gson = new Gson();
 	private final static Logger LOG = LoggerFactory.getLogger(PayrollDataServlet.class);
 
 	@Override
@@ -48,7 +49,7 @@ public class PayrollDataServlet extends HttpServlet {
 				break;
 			case "CURRENT":
 				Calendar cal = Calendar.getInstance();
-				String currentMonth = new SimpleDateFormat("YYYY-MM").format(cal.getTime());
+				String currentMonth = new SimpleDateFormat("yyyy-MM").format(cal.getTime());
 				LOG.info("Current Month in PayrollDataServlet  {}: ", currentMonth);
 				payrollList = payrollService.getCurrentMonthPayroll(currentMonth);
 				break;
@@ -69,7 +70,7 @@ public class PayrollDataServlet extends HttpServlet {
 			resp.getWriter().write(json);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Exception in the doGet {} : ", e.getMessage(), e);
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			resp.getWriter().write("{\"error\":\"Server error\"}");
 		}

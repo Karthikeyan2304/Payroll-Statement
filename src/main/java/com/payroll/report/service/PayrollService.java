@@ -13,7 +13,7 @@ import com.payroll.report.model.PayrollStatement;
 import com.payroll.report.repo.PayrollRepoImpl;
 
 public class PayrollService {
-	private static final Logger LOG = LoggerFactory.getLogger(PayrollService.class);
+
 
 	public static PayrollRepoImpl pay;
 	static {

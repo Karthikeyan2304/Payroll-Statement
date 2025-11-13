@@ -16,12 +16,19 @@ import com.payroll.report.model.PayrollStatement;
 import com.payroll.report.service.PayrollService;
 
 public class ExportExcelUtil {
+	 ExportExcelUtil exportExcelUtil;
 	static PayrollService payrollService;
-static {
-	payrollService = new PayrollService();
-}
+	static {
+		payrollService = new PayrollService();
+	}
+	
+
 	private ExportExcelUtil() {
-		
+
+	}
+
+	public void setExportExcelUtil(ExportExcelUtil exportExcelUtil) {
+		this.exportExcelUtil = exportExcelUtil;
 	}
 
 	public static void exportExcel(String month, String allPayroll, Boolean allPayrollFlag,

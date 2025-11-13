@@ -2,18 +2,18 @@ package com.payroll.report.controller;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Base64;
 
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -28,9 +28,10 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 
 	private static final long serialVersionUID = 2562418503227548100L;
 
-	private TemplateEngine templateEngine;
-	private PayrollService payrollService;
-	private UserService userService;
+	TemplateEngine templateEngine;
+	PayrollService payrollService;
+	UserService userService;
+	private static final Logger LOG = LoggerFactory.getLogger(LoginServlet.class);
 
 	@Override
 	public void init() throws ServletException {
@@ -43,9 +44,10 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 
 		templateEngine = new TemplateEngine();
 		templateEngine.setTemplateResolver(resolver);
-
-		payrollService = new PayrollService();
-		userService = new UserService();
+		if (payrollService == null)
+			payrollService = new PayrollService();
+		if (userService == null)
+			userService = new UserService();
 	}
 
 	// -------------------------- GET ----------------------------
@@ -58,9 +60,15 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 		HttpSession session = req.getSession(false);
 
 		// Already logged in → redirect
-		if (session != null && session.getAttribute("loggedInUser") != null && session.getAttribute("pendingOTPUser")==null) {
-			resp.sendRedirect(req.getContextPath() + "/welcome");
-			return;
+		try {
+			if (session != null && session.getAttribute("loggedInUser") != null
+					&& session.getAttribute("pendingOTPUser") == null) {
+				resp.sendRedirect(req.getContextPath() + "/welcome");
+				return;
+			}
+		} catch (Exception e) {
+			LOG.error("Exception in the  doGet {} :", e.getMessage(), e);
+
 		}
 
 		// Create session if not exists for AES key
@@ -73,8 +81,8 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 		new SecureRandom().nextBytes(keyBytes);
 		String sessionKey = Base64.getEncoder().encodeToString(keyBytes);
 		session.setAttribute("aesKey", sessionKey);
-		 context.setVariable("aesKey", sessionKey);
-		System.out.println("sessionKey : " + sessionKey);
+		context.setVariable("aesKey", sessionKey);
+		LOG.info("sessionKey {}:", sessionKey);
 
 		// OTP Pending flow
 		if (Boolean.TRUE.equals(session.getAttribute("otpPending"))) {
@@ -113,8 +121,6 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 			}
 
 			String base64Key = (String) session.getAttribute("aesKey");
-			// byte[] decodedKey = Base64.getDecoder().decode(base64Key);
-//			SecretKeySpec secretKey = new SecretKeySpec(decodedKey, "AES");
 
 			// --- STEP 3: Decrypt the credentials ---
 			String userName = AESUtil.decrypt(encryptedUserName, base64Key);
@@ -181,10 +187,17 @@ public class LoginServlet extends javax.servlet.http.HttpServlet {
 			resp.sendRedirect(req.getContextPath() + "/welcome");
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Exception in the doPost {} : ", e.getMessage(), e);
 			context.setVariable("error", "Error while decrypting or processing login: " + e.getMessage());
 			templateEngine.process("login", context, resp.getWriter());
 		}
 	}
 
+	protected boolean getOtpFlag() {
+		try {
+			return Boolean.parseBoolean(com.payroll.report.util.ClientProperties.getProperty("otp.flag").trim());
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }

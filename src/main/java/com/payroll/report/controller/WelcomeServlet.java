@@ -14,22 +14,16 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import com.payroll.report.service.PayrollService;
 
-/**
- * Servlet implementation class WelcomeServlet
- */
 public class WelcomeServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	public WelcomeServlet() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
 	private TemplateEngine templateEngine;
-	private PayrollService p;
+	 PayrollService p;
 
 	@Override
 	public void init() throws ServletException {
@@ -44,10 +38,7 @@ public class WelcomeServlet extends HttpServlet {
 		p = new PayrollService();
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		WebContext context = new WebContext(request, response, getServletContext(), response.getLocale());
@@ -64,13 +55,10 @@ public class WelcomeServlet extends HttpServlet {
 		templateEngine.process("welcome", context, response.getWriter());
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
+
 		doGet(request, response);
 	}
 

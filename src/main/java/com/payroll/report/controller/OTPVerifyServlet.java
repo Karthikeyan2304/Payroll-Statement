@@ -19,13 +19,10 @@ import com.twilio.Twilio;
 import com.twilio.exception.ApiException;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
 
-/**
- * Servlet implementation class OTPVerificationServlet
- */
 public class OTPVerifyServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOG = LoggerFactory.getLogger(OTPVerifyServlet.class);
-	private TemplateEngine templateEngine;
+	TemplateEngine templateEngine;
 	private static final String ACC_SID;
 	private static final String AUTH_TOKEN;
 	private static final String VERIFY_SERVICE_SID;
@@ -39,8 +36,7 @@ public class OTPVerifyServlet extends HttpServlet {
 			verifySid = ClientProperties.getProperty("twilio.verfiyaccsid").trim();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("IOException : {}", e.getMessage(), e);
 		}
 		ACC_SID = accSid;
 		AUTH_TOKEN = authToken;
@@ -99,7 +95,7 @@ public class OTPVerifyServlet extends HttpServlet {
 			request.setAttribute("showOTPField", false);
 			request.setAttribute("phoneNumber", phoneNumber);
 			templateEngine.process("login", context, response.getWriter());
-			;
+			
 		}
 	}
 

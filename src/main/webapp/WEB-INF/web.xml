@@ -4,8 +4,9 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	version="3.0">
 	<display-name>payrollreport</display-name>
+	
 	<listener>
-		<listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
+		<listener-class>com.payroll.report.listener.PayrollDBTruncateListener</listener-class>
 	</listener>
 	<servlet>
 		<servlet-name>LoginServlet</servlet-name>

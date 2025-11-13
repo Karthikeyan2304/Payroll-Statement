@@ -1,6 +1,7 @@
 package com.payroll.report.controller;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -16,19 +19,14 @@ import com.payroll.report.util.DatabaseUtil;
 import com.payroll.report.util.DuplicateUserException;
 import com.payroll.report.util.PayrollReportHasher;
 
-/**
- * Servlet implementation class RegisterServlet
- */
 public class RegisterServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private TemplateEngine templateEngine;
+	static TemplateEngine templateEngine;
+	private static final Logger LOG = LoggerFactory.getLogger(RegisterServlet.class);
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	public RegisterServlet() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
 	@Override
@@ -43,10 +41,8 @@ public class RegisterServlet extends HttpServlet {
 		templateEngine.setTemplateResolver(classLoaderTemp);
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		WebContext context = new WebContext(request, response, getServletContext(), response.getLocale());
@@ -70,10 +66,7 @@ public class RegisterServlet extends HttpServlet {
 		}
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
@@ -83,11 +76,7 @@ public class RegisterServlet extends HttpServlet {
 		String userID = request.getParameter("userid");
 		String mobileno = request.getParameter("mobileno");
 		String userType = request.getParameter("role");
-		// HttpSession session = request.getSession();
-//		session.setAttribute("userid", userID);
-//		session.setAttribute("userName", userName);
-//		session.setAttribute("mobileno", mobileno);
-//		session.setAttribute("passWord", passWord);
+
 		WebContext context = new WebContext(request, response, getServletContext(), response.getLocale());
 		if (StringUtils.isNoneBlank(passWord) && StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(mobileno)
 				&& StringUtils.isNotBlank(userType)) {
@@ -99,13 +88,13 @@ public class RegisterServlet extends HttpServlet {
 			} catch (DuplicateUserException e) {
 				context.setVariable("error", "User already present");
 				templateEngine.process("registerUser", context, response.getWriter());
-				// throw new DuplicateUserException("User already present");
+				LOG.error("DuplicateUserException in the doPost {} : ", e.getMessage(), e);
 			} catch (Exception e) {
+				LOG.error("Exception in the doPost {} : ", e.getMessage(), e);
 
-				// TODO Auto-generated catch block
 				context.setVariable("error", "Please enter username or password");
 				templateEngine.process("registerUser", context, response.getWriter());
-				e.printStackTrace();
+
 			}
 
 		} else {

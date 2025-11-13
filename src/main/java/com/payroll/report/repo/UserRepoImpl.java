@@ -11,8 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.payroll.report.constant.QueryConstant;
+import com.payroll.report.constant.DBType;
 import com.payroll.report.db.connection.DBFactory;
-import com.payroll.report.util.ClientConstant;
 import com.payroll.report.util.ClientProperties;
 import com.payroll.report.util.PayrollReportHasher;
 import com.twilio.Twilio;
@@ -23,23 +24,22 @@ public class UserRepoImpl implements UserRepo {
 
 	@Override
 	public boolean checkValidUser(String userName, String passWord) throws SQLException {
-		Connection con = DBFactory.getConnection("ORACLE").getConnection();
-		// String user = null;
-		// String pass = null;
+		Connection con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
 		String sql = null;
 		try {
 			sql = ClientProperties.getProperty("check.user.query");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("IOException in the checkValidUser {} : " , e.getMessage(),e);
 		}
 		if (con != null && sql != null) {
 			LOG.info("DB Connected");
 			try {
-				PreparedStatement ps = con.prepareStatement(sql);
+				ps = con.prepareStatement(sql);
 				ps.setString(1, userName.trim().toLowerCase());
-				// ps.setString(2, passWord);
-				ResultSet rs = ps.executeQuery();
+				rs = ps.executeQuery();
 				while (rs.next()) {
 					String storedHash = rs.getString("password_hash");
 					if (PayrollReportHasher.checkPassword(passWord, storedHash)) {
@@ -55,8 +55,10 @@ public class UserRepoImpl implements UserRepo {
 				}
 
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+				LOG.error("SQLException in the  checkValidUser : {}", e.getMessage(), e);
+			} finally {
+				DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
 			}
 
 		}
@@ -67,8 +69,8 @@ public class UserRepoImpl implements UserRepo {
 	@Override
 
 	public String getUserMobile(String username) throws SQLException {
-		// TODO Auto-generated method stub
-		String sql = ClientConstant.USERMOBNOQUERY;
+
+		String sql = QueryConstant.USERMOBNOQUERY;
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -76,7 +78,7 @@ public class UserRepoImpl implements UserRepo {
 		if (StringUtils.isNotBlank(username)) {
 
 			try {
-				con = DBFactory.getConnection("ORACLE").getConnection();
+				con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 				ps = con.prepareStatement(sql);
 				ps.setString(1, username.trim());
 
@@ -85,9 +87,9 @@ public class UserRepoImpl implements UserRepo {
 					mobileNum = rs.getString("MOBILE");
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				LOG.error("SQLException in the  getUserMobile : {}", e.getMessage(), e);
 			} finally {
-				DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+				DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 			}
 
 		} else {
@@ -99,7 +101,7 @@ public class UserRepoImpl implements UserRepo {
 
 	@Override
 	public boolean duplicateUserCheck(String userName) throws IOException, SQLException {
-		Connection con = DBFactory.getConnection("ORACLE").getConnection();
+		Connection con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		String sql = ClientProperties.getProperty("check.dul.user.query");
@@ -114,10 +116,10 @@ public class UserRepoImpl implements UserRepo {
 					return true;
 				}
 			} catch (Exception e) {
-				LOG.error("Database error while checking duplicate user", e);
-				e.printStackTrace();
+				LOG.error("Database error while checking duplicate user : {}", e);
+
 			} finally {
-				DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+				DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 			}
 		}
 		return false;
@@ -138,12 +140,12 @@ public class UserRepoImpl implements UserRepo {
 				return;
 			}
 			Verification verification = Verification.creator(verifySid, phoneNumber, "sms").create();
-			LOG.info("OTP Status: " + verification.getStatus());
+			LOG.info("OTP Status: {}",verification.getStatus());
 			LOG.info("OTP has been successfully generated and sent to {} at {}", phoneNumber, LocalDateTime.now());
 
 		} catch (com.twilio.exception.ApiException e) {
 			LOG.error("Twilio API Exception: Code={}, Message={}", e.getCode(), e.getMessage());
-			e.printStackTrace();
+
 		} catch (Exception e) {
 			LOG.error("Failed to connect the OTP API: {}", e.getMessage(), e);
 		}
@@ -154,12 +156,12 @@ public class UserRepoImpl implements UserRepo {
 		String roleType = null;
 		if (StringUtils.isNoneBlank(userName)) {
 
-			String sql = ClientConstant.USERTYPEQUERY;
+			String sql = QueryConstant.USERTYPEQUERY;
 			Connection con = null;
 			PreparedStatement ps = null;
 			ResultSet rs = null;
 			try {
-				con = DBFactory.getConnection("ORACLE").getConnection();
+				con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 				ps = con.prepareStatement(sql);
 				ps.setString(1, userName.trim());
 				rs = ps.executeQuery();
@@ -174,15 +176,18 @@ public class UserRepoImpl implements UserRepo {
 					}
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("SQLException in the getUserMobile {} : ", e.getMessage(), e);
 			} finally {
-				DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+				DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 			}
 
 		}
 		return adminRole;
 
+	}
+
+	public Connection getConnection() throws SQLException {
+	    return DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 	}
 
 }

@@ -27,9 +27,9 @@ public class UserService {
 		if (StringUtils.isNotBlank(mobileNumber)) {
 
 			userRepo.sendOTPToUser(mobileNumber);
-			LOG.info("Sending OTP to the mobile mumber {} " + mobileNumber);
+			LOG.info("Sending OTP to the mobile number : {} ",mobileNumber);
 		} else {
-			LOG.error("No Mobile Number  " + mobileNumber);
+			LOG.error("No Mobile Number : {} ",mobileNumber);
 		}
 	}
 

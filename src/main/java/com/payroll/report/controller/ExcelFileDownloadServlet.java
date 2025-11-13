@@ -1,8 +1,6 @@
 package com.payroll.report.controller;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,33 +8,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import com.payroll.report.model.PayrollStatement;
 import com.payroll.report.service.PayrollService;
 import com.payroll.report.util.ExportExcelUtil;
 
-/**
- * Servlet implementation class ExcelFileDownloadServlet
- */
 public class ExcelFileDownloadServlet extends HttpServlet {
+
 	private static final long serialVersionUID = 1L;
+
 	TemplateEngine templateEngine;
 	PayrollService payrollService;
+	ExportExcelUtil exportExcelUtil;
+	private final static Logger LOG = LoggerFactory.getLogger(ExcelFileDownloadServlet.class);
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	public ExcelFileDownloadServlet() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
+	@Override
 	public void init() throws javax.servlet.ServletException {
 		ClassLoaderTemplateResolver classLoaderTemp = new ClassLoaderTemplateResolver();
 		classLoaderTemp.setPrefix("templates/");
@@ -50,10 +44,11 @@ public class ExcelFileDownloadServlet extends HttpServlet {
 
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	public void setExportExcelUtil(ExportExcelUtil exportExcelUtil) {
+		this.exportExcelUtil = exportExcelUtil;
+	}
+
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -67,18 +62,26 @@ public class ExcelFileDownloadServlet extends HttpServlet {
 		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 		response.setHeader("Content-Disposition", "attachment; filename=Payroll_" + month + ".xlsx");
-
-		ExportExcelUtil.exportExcel(month, allPayroll, allPayrollFlag, response);
+		try {
+			ExportExcelUtil.exportExcel(month, allPayroll, allPayrollFlag, response);
+		} catch (Exception e) {
+			LOG.error("Exception in the  doGet {} :", e.getMessage(), e);
+		}
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+
+		try {
+			doGet(request, response);
+		} catch (Exception e) {
+			LOG.error("Exception in the  doPost {} :", e.getMessage(), e);
+		}
+	}
+
+	public void setPayrollService(PayrollService payrollService) {
+		this.payrollService = payrollService;
 	}
 
 }

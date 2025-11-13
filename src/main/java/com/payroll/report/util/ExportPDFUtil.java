@@ -1,8 +1,8 @@
 package com.payroll.report.util;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +17,6 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -26,11 +25,12 @@ import com.payroll.report.service.PayrollService;
 
 public class ExportPDFUtil {
 	static PayrollService payrollService;
-static {
-	payrollService = new PayrollService();
-}
+	static {
+		payrollService = new PayrollService();
+	}
+
 	private ExportPDFUtil() {
-		
+
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExportPDFUtil.class);
@@ -38,101 +38,78 @@ static {
 	public static void exportPDF(String fileName, String[] headers, HttpServletResponse response, String allPayroll,
 			Boolean allPayrollFlag, String month) throws IOException {
 
+// Determine PDF file name
+		String pdfFileName = "PayrollReport.pdf";
+		if (StringUtils.isNotBlank(allPayroll)) {
+			pdfFileName = "allPayroll.pdf";
+			allPayrollFlag = Boolean.parseBoolean(allPayroll);
+		} else if (StringUtils.isNotBlank(month)) {
+			pdfFileName = "Payroll_" + month + ".pdf";
+		}
 		response.setContentType("application/pdf");
+		response.setHeader("Content-Disposition", "attachment; filename=" + pdfFileName);
+
+// Fetch payroll data
+		List<PayrollStatement> list = Collections.emptyList();
+		try {
+			if (allPayrollFlag) {
+				list = payrollService.getAllPayrolls(null, null);
+			} else if (StringUtils.isNotBlank(month)) {
+				list = payrollService.getPayrollsMonthWise(month);
+			}
+		} catch (IOException | SQLException e) {
+			LOG.error("Error fetching payroll data for PDF: {}", e.getMessage(), e);
+		}
+
 		Document doc = new Document();
 		try {
 			PdfWriter.getInstance(doc, response.getOutputStream());
 			doc.open();
 
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (StringUtils.isNotBlank(allPayroll)) {
-			try {
-				doc.add(new Paragraph("Overall Payroll Data"));
-			} catch (DocumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			fileName = "allPayroll.pdf";
-			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-			allPayrollFlag = Boolean.parseBoolean(allPayroll);
+			String title = StringUtils.isNotBlank(allPayroll) ? "Overall Payroll Data" : "Monthly Payroll Data";
+			doc.add(new Paragraph(title));
+			doc.add(new Paragraph(" ")); // empty line for spacing
+			PdfPTable table = new PdfPTable(headers.length);
+			table.setWidthPercentage(100); // 100% width
+			table.setSpacingBefore(10f);
+			table.setSpacingAfter(10f);
 
-		}
-		List<PayrollStatement> list = null;
-		if (StringUtils.isNotBlank(month)) {
-			try {
-				doc.add(new Paragraph("Monthly Payroll Data"));
-			} catch (DocumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for (String header : headers) {
+				PdfPCell headerCell = new PdfPCell(new Phrase(header));
+				headerCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+				headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+				headerCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+				table.addCell(headerCell);
 			}
-			fileName = "Payroll_" + month + ".pdf";
-			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-			try {
-				list = payrollService.getPayrollsMonthWise(month);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for (PayrollStatement p : list) {
+				table.addCell(String.valueOf(p.getId()));
+				table.addCell(String.valueOf(p.getEmpCode()));
+				table.addCell(p.getName() != null ? p.getName() : "");
+				table.addCell(p.getPayrollMonth() != null ? String.valueOf(p.getPayrollMonth()) : "");
+				table.addCell(p.getBasicPay() != null ? String.format("%.2f", p.getBasicPay()) : "0.00");
+				table.addCell(p.getHra() != null ? String.format("%.2f", p.getHra()) : "0.00");
+				table.addCell(p.getAllowances() != null ? String.format("%.2f", p.getAllowances()) : "0.00");
+				table.addCell(p.getDeductions() != null ? String.format("%.2f", p.getDeductions()) : "0.00");
+				table.addCell(p.getTax() != null ? String.format("%.2f", p.getTax()) : "0.00");
+				table.addCell(String.valueOf(p.getOvertimeHours()));
+				table.addCell(p.getOvertimeAmount() != null ? String.format("%.2f", p.getOvertimeAmount()) : "0.00");
+				table.addCell(p.getBonusAmount() != null ? String.format("%.2f", p.getBonusAmount()) : "0.00");
+				table.addCell(p.getGrossPay() != null ? String.format("%.2f", p.getGrossPay()) : "0.00");
+				table.addCell(p.getNetPay() != null ? String.format("%.2f", p.getNetPay()) : "0.00");
+				table.addCell(p.getStatus() != null ? p.getStatus() : "");
 			}
-		}
 
-		if (allPayrollFlag) {
-			try {
-				list = payrollService.getAllPayrolls(null, null);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		PdfPTable table = new PdfPTable(headers.length);
-		table.setWidthPercentage(105);
-		table.getDefaultCell().setBorder(Rectangle.BOX);
-		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
-		table.getDefaultCell().setVerticalAlignment(Element.ALIGN_MIDDLE); 
-		for (int i = 0; i < headers.length; i++) {
-			PdfPCell headerCell = new PdfPCell(new Phrase(headers[i]));
-			headerCell.setBackgroundColor(BaseColor.GRAY);
-			
-			table.addCell(headerCell);
-		}
-
-		for (PayrollStatement p : list) {
-			table.addCell(String.valueOf(p.getId()));
-			table.addCell(String.valueOf(p.getEmpCode()));
-			table.addCell(p.getName());
-			table.addCell(String.valueOf(p.getPayrollMonth()));
-			table.addCell(String.valueOf(p.getBasicPay().doubleValue()));
-			table.addCell(String.valueOf(p.getHra().doubleValue()));
-			table.addCell(String.valueOf(p.getAllowances().doubleValue()));
-			table.addCell(String.valueOf(p.getDeductions().doubleValue()));
-			table.addCell(String.valueOf(p.getTax().doubleValue()));
-			table.addCell(String.valueOf(p.getOvertimeHours()));
-			table.addCell(String.valueOf(p.getOvertimeAmount().doubleValue()));
-			table.addCell(String.valueOf(p.getBonusAmount().doubleValue()));
-			table.addCell(String.valueOf(p.getGrossPay().doubleValue()));
-			table.addCell(String.valueOf(p.getNetPay().doubleValue()));
-			table.addCell(String.valueOf(p.getStatus()));
-		}
-		try {
 			doc.add(table);
-			doc.close();
-			LOG.info("PDF TABLE Ended");
-		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			LOG.info("PDF export completed successfully: {}", pdfFileName);
 
+		} catch (DocumentException | IOException e) {
+			LOG.error("Exception while generating PDF {}: {}", pdfFileName, e.getMessage(), e);
+			throw new IOException("Error generating PDF: " + e.getMessage(), e);
+		} finally {
+			if (doc.isOpen()) {
+				doc.close();
+			}
+		}
 	}
 }

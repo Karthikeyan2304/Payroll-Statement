@@ -1,14 +1,22 @@
 package com.payroll.report.filter;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
 import java.io.IOException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpsRedirectFilter implements Filter {
 
-	private static final Logger LOG = LogManager.getLogger(HttpsRedirectFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HttpsRedirectFilter.class);
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -17,7 +25,7 @@ public class HttpsRedirectFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
 
-		LOG.info("HttpsRedirectFilter Started", request.getRequestURI());
+		LOG.info("HttpsRedirectFilter Started {} : 	", request.getRequestURI());
 		if (request.isSecure()) {
 			response.setHeader("Access-Control-Allow-Origin", "https://localhost:8443");
 			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -43,14 +51,12 @@ public class HttpsRedirectFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 }

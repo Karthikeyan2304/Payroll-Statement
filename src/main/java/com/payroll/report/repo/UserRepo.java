@@ -1,6 +1,7 @@
 package com.payroll.report.repo;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface UserRepo {
@@ -9,5 +10,6 @@ public interface UserRepo {
 	public boolean getUserType(String userName) throws SQLException;
 	boolean duplicateUserCheck(String userName) throws IOException, SQLException;
 	public void sendOTPToUser(String phoneNumber);
+	Connection getConnection() throws SQLException;
 	
 }

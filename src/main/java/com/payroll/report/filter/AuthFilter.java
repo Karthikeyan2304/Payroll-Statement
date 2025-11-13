@@ -13,7 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AuthFilter implements Filter {
+	private static final Logger LOG = LoggerFactory.getLogger(AuthFilter.class);
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -34,7 +38,7 @@ public class AuthFilter implements Filter {
 			return;
 		}
 
-		// No active session → redirect to login
+		// No active session -> redirect to login
 		if (session == null) {
 			redirectToLogin(resp, contextPath);
 			return;
@@ -55,23 +59,23 @@ public class AuthFilter implements Filter {
 			}
 		}
 
-		// 5️ Validate presence of user and session key
+		// 5️) Validate presence of user and session key
 		if (loggedInUser == null || serverSessionKey == null || cookieSessionKey == null) {
-			System.out.println("[AuthFilter] Missing authentication details. Redirecting to login.");
+			LOG.info("[AuthFilter] Missing authentication details. Redirecting to login.");
 			invalidateSession(session);
 			redirectToLogin(resp, contextPath);
 			return;
 		}
 
-		// 6️⃣ Cross-check sessionKey from cookie and server
+		// 6️) Cross check sessionKey from cookie and server
 		if (!serverSessionKey.equals(cookieSessionKey)) {
-			System.out.println("[AuthFilter] Session key mismatch. Possible hijack attempt detected.");
+			LOG.info("[AuthFilter] Session key mismatch. Possible hijack attempt detected.");
 			invalidateSession(session);
 			redirectToLogin(resp, contextPath);
 			return;
 		}
 
-		// 7️⃣ Everything is valid → proceed with request
+		// 7️) Everything is valid -> proceed with request
 		chain.doFilter(request, response);
 	}
 
@@ -83,18 +87,18 @@ public class AuthFilter implements Filter {
 		try {
 			session.invalidate();
 		} catch (IllegalStateException ignored) {
+			LOG.error("IllegalStateException");
+
 		}
 	}
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
 
 	}
 }

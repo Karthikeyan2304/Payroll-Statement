@@ -12,24 +12,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.payroll.report.constant.QueryConstant;
+import com.payroll.report.constant.DBType;
 import com.payroll.report.db.connection.DBFactory;
 import com.payroll.report.model.PayrollStatement;
-import com.payroll.report.util.ClientConstant;
 
 public class PayrollRepoImpl implements PayrollRepo {
 	private static final Logger LOG = LoggerFactory.getLogger(PayrollRepoImpl.class);
-//	ClientProperties clientProperties;
 
 	@Override
 	public List<PayrollStatement> getAllPayrolls() throws IOException, SQLException {
 		List<PayrollStatement> list = new ArrayList<>();
-		String sql = ClientConstant.ALLPAYROLLQUERY;
+		String sql = QueryConstant.ALLPAYROLLQUERY;
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			con = DBFactory.getConnection("ORACLE").getConnection();
+			con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 			ps = con.prepareStatement(sql);
 			rs = ps.executeQuery();
 			while (rs.next()) {
@@ -52,23 +52,23 @@ public class PayrollRepoImpl implements PayrollRepo {
 				list.add(p);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error("SQLException in the getAllPayrolls {} : ",e.getMessage(),e);
 		} finally {
-			DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+			DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 		}
 		return list;
 	}
 
 	@Override
 	public List<PayrollStatement> getPayrollsMonthWise(String month) throws IOException, SQLException {
-		List<PayrollStatement> list = new ArrayList<>();
-		String sql = ClientConstant.MONTHWISEPAYROLLQUERY;
+		List<PayrollStatement> list = new ArrayList<PayrollStatement>();
+		String sql = QueryConstant.MONTHWISEPAYROLLQUERY;
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			con = DBFactory.getConnection("ORACLE").getConnection();
+			con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 			ps = con.prepareStatement(sql);
 			ps.setString(1, month.trim());
 			ps.setString(2, month.trim());
@@ -93,20 +93,16 @@ public class PayrollRepoImpl implements PayrollRepo {
 				list.add(p);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error("SQLException in the getPayrollsMonthWise {} : ",e.getMessage(),e);
 		} finally {
-			DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+			DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 		}
 		return list;
 	}
 
-	
-
-	
-
 	public List<PayrollStatement> getCurrentMonthPayroll(String currentMonth) throws SQLException {
 		List<PayrollStatement> list = new ArrayList<>();
-		String sql = ClientConstant.CURRENTMONTHPAYROLLQUERY;
+		String sql = QueryConstant.CURRENTMONTHPAYROLLQUERY;
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -136,21 +132,21 @@ public class PayrollRepoImpl implements PayrollRepo {
 				list.add(p);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error("SQLException in the getCurrentMonthPayroll {} : ",e.getMessage(),e);
 		} finally {
-			DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+			DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 		}
 		return list;
 	}
 
 	public List<PayrollStatement> getPreviousMonthPayroll(String currentMonth) throws SQLException {
 		List<PayrollStatement> list = new ArrayList<>();
-		String sql = ClientConstant.PREVIOUSMONTHPAYROLLQUERY;
+		String sql = QueryConstant.PREVIOUSMONTHPAYROLLQUERY;
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
-			con = DBFactory.getConnection("ORACLE").getConnection();
+			con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 			ps = con.prepareStatement(sql);
 			ps.setString(1, currentMonth.trim());
 			ps.setString(2, currentMonth.trim());
@@ -175,21 +171,21 @@ public class PayrollRepoImpl implements PayrollRepo {
 				list.add(p);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error("SQLException in the getPreviousMonthPayroll {} : ",e.getMessage(),e);
 		} finally {
-			DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+			DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 		}
 		return list;
 	}
 
 	public List<PayrollStatement> getYTPPayroll(String startOfYearDate, String endOfYearDate) throws SQLException {
 		List<PayrollStatement> list = new ArrayList<>();
-		String sql = ClientConstant.YTPPAYROLLQUERY;
+		String sql = QueryConstant.YTPPAYROLLQUERY;
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
-			con = DBFactory.getConnection("ORACLE").getConnection();
+			con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 			ps = con.prepareStatement(sql);
 			ps.setString(1, startOfYearDate.trim());
 			ps.setString(2, endOfYearDate.trim());
@@ -214,9 +210,9 @@ public class PayrollRepoImpl implements PayrollRepo {
 				list.add(p);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error("SQLException in the getYTPPayroll {} : ",e.getMessage(),e);
 		} finally {
-			DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+			DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 		}
 		return list;
 	}
@@ -226,12 +222,12 @@ public class PayrollRepoImpl implements PayrollRepo {
 		String roleType = null;
 		if (StringUtils.isNoneBlank(userName)) {
 
-			String sql = ClientConstant.USERTYPEQUERY;
+			String sql = QueryConstant.USERTYPEQUERY;
 			Connection con = null;
 			PreparedStatement ps = null;
 			ResultSet rs = null;
 			try {
-				con = DBFactory.getConnection("ORACLE").getConnection();
+				con = DBFactory.getConnection(DBType.ORACLE.name()).getConnection();
 				ps = con.prepareStatement(sql);
 				ps.setString(1, userName.trim());
 				rs = ps.executeQuery();
@@ -246,15 +242,21 @@ public class PayrollRepoImpl implements PayrollRepo {
 					}
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				LOG.error("SQLException in the getUserType {} : ",e.getMessage(),e);
 			} finally {
-				DBFactory.getConnection("ORACLE").closeConnection(con, ps, rs);
+				DBFactory.getConnection(DBType.ORACLE.name()).closeConnection(con, ps, rs);
 			}
 
 		}
 		return adminRole;
 
+	}
+
+	@Override
+	public Connection getConnection() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
